@@ -1,4 +1,4 @@
-// server.js with product and upload routes
+// server.js with cart routes added
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -43,6 +43,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/api/auth', require('./routes/authRoutes')); 
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/cart', require('./routes/cartRoutes')); // Add cart routes
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -141,10 +142,11 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log('🌐 CORS enabled for:', corsOptions.origin);
   console.log('💾 MongoDB URI:', process.env.MONGODB_URI ? '✅ Configured' : '❌ Missing');
   console.log('☁️  AWS S3 Bucket:', process.env.AWS_S3_BUCKET ? '✅ Configured' : '❌ Missing');
+  console.log('🛒 Cart API: /api/cart');
 });
 
 // Graceful shutdown
@@ -161,4 +163,3 @@ process.on('unhandledRejection', (err, promise) => {
     process.exit(1);
   });
 });
-

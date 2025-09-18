@@ -8,6 +8,7 @@ import UserDashboard from './components/UserDashboard';
 import ShoppingCartPage from './components/ShoppingCartPage';
 import ProductsPage from './components/ProductsPage';
 import SellerDashboard from './components/SellerDashboard';
+import Cart from './components/Cart';
 import './index.css';
 
 function App() {
@@ -20,9 +21,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/cart" element={<ShoppingCartPage />} />
+          {/* <Route path="/cart" element={<ShoppingCartPage />} /> */}
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/seller-dashboard" element={<SellerDashboard />} />
+          <Route path="/cart" element={<Cart />} />
 
 
         </Routes>

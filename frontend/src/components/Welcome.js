@@ -13,11 +13,38 @@ const Welcome = () => {
   const [productViewMode, setProductViewMode] = useState('grid'); // 'grid' or 'list'
   const [productFilter, setProductFilter] = useState('all'); // 'all', 'Electronics', 'Fashion', etc.
   const [productSort, setProductSort] = useState('newest'); // 'newest', 'price_low', 'price_high', 'popular'
+  
+  // Cart states
+  const [cart, setCart] = useState([]);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [addToCartLoading, setAddToCartLoading] = useState({});
+  
+  // Notification state
+  const [notification, setNotification] = useState({ message: '', type: '' });
+
+  // Show notification helper function
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification({ message: '', type: '' });
+    }, 3000);
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
+    }
+    
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+        setCart([]);
+      }
     }
     
     // Fetch products when component mounts
@@ -44,13 +71,21 @@ const Welcome = () => {
         setProducts(data.products || []);
       } else {
         console.error('Failed to fetch products:', response.status);
+        showNotification('Failed to load products', 'error');
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      showNotification('Network error while loading products', 'error');
     } finally {
       setProductsLoading(false);
     }
   };
+
+  // Get unique categories from products
+  const availableCategories = React.useMemo(() => {
+    const categories = [...new Set(products.map(p => p.category))];
+    return categories.filter(Boolean);
+  }, [products]);
 
   // Filter and sort products
   const filteredAndSortedProducts = React.useMemo(() => {
@@ -79,11 +114,86 @@ const Welcome = () => {
     return sorted;
   }, [products, productFilter, productSort]);
 
-  // Get unique categories from products
-  const availableCategories = React.useMemo(() => {
-    const categories = [...new Set(products.map(p => p.category))];
-    return categories.filter(Boolean);
-  }, [products]);
+  // Add to cart function
+  const addToCart = async (product, quantity = 1) => {
+    try {
+      console.log('Adding to cart:', product._id, 'Quantity:', quantity);
+      setAddToCartLoading(prev => ({ ...prev, [product._id]: true }));
+
+      if (user) {
+        // If user is logged in, sync with backend
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            productId: product._id,
+            quantity,
+            price: product.price
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Cart updated on server:', data);
+          
+          // Update local cart state
+          setCart(data.cart.items || []);
+          localStorage.setItem('cart', JSON.stringify(data.cart.items || []));
+          
+          // Show success message
+          showNotification('Product added to cart successfully!', 'success');
+        } else {
+          throw new Error('Failed to add to cart on server');
+        }
+      } else {
+        // Guest user - use localStorage only
+        const existingItem = cart.find(item => item.product._id === product._id);
+        let updatedCart;
+
+        if (existingItem) {
+          // Update quantity if item already exists
+          updatedCart = cart.map(item =>
+            item.product._id === product._id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        } else {
+          // Add new item to cart
+          updatedCart = [...cart, {
+            product: {
+              _id: product._id,
+              name: product.name,
+              price: product.price,
+              images: product.images,
+              supplier: product.supplier
+            },
+            quantity,
+            price: product.price
+          }];
+        }
+
+        setCart(updatedCart);
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        showNotification('Product added to cart!', 'success');
+      }
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      showNotification('Failed to add product to cart. Please try again.', 'error');
+    } finally {
+      setAddToCartLoading(prev => ({ ...prev, [product._id]: false }));
+    }
+  };
+
+  // Get cart item count
+  const getCartItemCount = (productId) => {
+    const item = cart.find(item => item.product._id === productId);
+    return item ? item.quantity : 0;
+  };
 
   // Navigation helper function
   const navigate = (path, params = {}) => {
@@ -222,6 +332,8 @@ const Welcome = () => {
     
     const companyName = product.supplier?.profile?.company || '';
     const rating = product.supplier?.supplierInfo?.rating?.average || 0;
+    const cartItemCount = getCartItemCount(product._id);
+    const isAddingToCart = addToCartLoading[product._id] || false;
 
     return (
       <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 group">
@@ -244,6 +356,11 @@ const Welcome = () => {
             <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 text-xs rounded-full flex items-center space-x-1">
               <Eye className="w-3 h-3" />
               <span>{product.views}</span>
+            </div>
+          )}
+          {cartItemCount > 0 && (
+            <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 text-xs font-bold rounded-full">
+              {cartItemCount} in cart
             </div>
           )}
         </div>
@@ -281,7 +398,7 @@ const Welcome = () => {
           </div>
 
           {/* Supplier Info */}
-          <div className="border-t border-gray-100 pt-3">
+          <div className="border-t border-gray-100 pt-3 mb-3">
             <div 
               className="flex items-center justify-between cursor-pointer hover:text-orange-600 transition-colors"
               onClick={() => handleSupplierClick(product.supplier)}
@@ -305,12 +422,44 @@ const Welcome = () => {
             </div>
           </div>
 
-          {/* Contact Button */}
+          {/* Add to Cart Button */}
           <button 
-            onClick={() => navigate(`/contact-supplier/${product.supplier?._id}`, { productId: product._id })}
-            className="w-full mt-3 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors text-sm font-medium"
+            onClick={() => addToCart(product, product.minOrderQuantity)}
+            disabled={isAddingToCart || product.status !== 'active'}
+            className={`w-full py-2 px-4 rounded-md transition-all text-sm font-medium flex items-center justify-center space-x-2 ${
+              product.status !== 'active' 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : isAddingToCart
+                ? 'bg-orange-400 text-white cursor-not-allowed'
+                : cartItemCount > 0
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-orange-600 text-white hover:bg-orange-700'
+            }`}
           >
-            Contact Supplier
+            {isAddingToCart ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Adding...</span>
+              </>
+            ) : cartItemCount > 0 ? (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                <span>Add More ({cartItemCount})</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                <span>Add to Cart</span>
+              </>
+            )}
+          </button>
+
+          {/* View Details Button */}
+          <button 
+            onClick={() => handleProductClick(product)}
+            className="w-full mt-2 bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium"
+          >
+            View Details
           </button>
         </div>
       </div>
@@ -319,6 +468,17 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Notification */}
+      {notification.message && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-500 text-white' : 
+          notification.type === 'error' ? 'bg-red-500 text-white' : 
+          'bg-blue-500 text-white'
+        }`}>
+          {notification.message}
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white">
         {/* Top Bar */}
@@ -343,8 +503,13 @@ const Welcome = () => {
               <button onClick={() => navigate('/notifications')} className="hover:text-orange-500">
                 <Bell className="w-4 h-4" />
               </button>
-              <button onClick={() => navigate('/cart')} className="hover:text-orange-500">
+              <button onClick={() => navigate('/cart')} className="hover:text-orange-500 relative">
                 <ShoppingCart className="w-4 h-4" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {cart.reduce((total, item) => total + item.quantity, 0)}
+                  </span>
+                )}
               </button>
               <button onClick={handleUserAction} className="hover:text-orange-500">
                 <User className="w-4 h-4" />
@@ -666,7 +831,7 @@ const Welcome = () => {
                   Recently Added
                 </h3>
                 <div className="space-y-3">
-                  {products.slice(0, 3).map((product, index) => (
+                  {products.slice(0, 3).map((product) => (
                     <div 
                       key={product._id}
                       onClick={() => handleProductClick(product)}
