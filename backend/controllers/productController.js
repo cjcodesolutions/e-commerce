@@ -1,4 +1,4 @@
-// backend/controllers/productController.js
+// backend/controllers/productController.js - Fixed Version
 const Product = require('../models/Product');
 const User = require('../models/User');
 
@@ -19,10 +19,10 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    // Add seller to product data
+    // Add supplier to product data
     const productData = {
       ...req.body,
-      seller: req.user._id
+      supplier: req.user._id  // Changed from seller to supplier
     };
 
     // Validate required fields
@@ -80,18 +80,18 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// @desc    Get all products for current seller
+// @desc    Get all products for current supplier
 // @route   GET /api/products/seller/my-products
 // @access  Private (Suppliers only)
 exports.getSellerProducts = async (req, res) => {
   try {
-    console.log('=== GET SELLER PRODUCTS ===');
-    console.log('Seller ID:', req.user._id);
+    console.log('=== GET SUPPLIER PRODUCTS ===');
+    console.log('Supplier ID:', req.user._id);
 
     const { status, category, page = 1, limit = 20, sort = '-createdAt' } = req.query;
 
     // Build query
-    const query = { seller: req.user._id };
+    const query = { supplier: req.user._id };  // Changed from seller to supplier
     
     if (status && status !== 'all') {
       query.status = status;
@@ -103,7 +103,7 @@ exports.getSellerProducts = async (req, res) => {
 
     console.log('Query:', query);
 
-    // Execute query with pagination - DON'T populate seller to avoid User model transform error
+    // Execute query with pagination
     const products = await Product.find(query)
       .sort(sort)
       .limit(limit * 1)
@@ -124,7 +124,7 @@ exports.getSellerProducts = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get seller products error:', error);
+    console.error('Get supplier products error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching products'
@@ -141,7 +141,7 @@ exports.getProduct = async (req, res) => {
     console.log('Product ID:', req.params.id);
 
     const product = await Product.findById(req.params.id)
-      .populate('seller', 'firstName lastName email profile.company profile.avatar supplierInfo.rating');
+      .populate('supplier', 'firstName lastName email profile.company profile.avatar supplierInfo.rating');
 
     if (!product) {
       return res.status(404).json({
@@ -212,7 +212,7 @@ exports.updateProduct = async (req, res) => {
         new: true,
         runValidators: true
       }
-    ).populate('seller', 'firstName lastName email');
+    ).populate('supplier', 'firstName lastName email');
 
     console.log('Product updated successfully');
 
@@ -342,7 +342,7 @@ exports.getProducts = async (req, res) => {
 
     // Execute query
     let productsQuery = Product.find(query)
-      .populate('seller', 'firstName lastName profile.company supplierInfo.rating')
+      .populate('supplier', 'firstName lastName profile.company supplierInfo.rating')
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
@@ -376,19 +376,19 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// @desc    Get product analytics for seller
+// @desc    Get product analytics for supplier
 // @route   GET /api/products/analytics/seller
 // @access  Private (Suppliers only)
 exports.getSellerAnalytics = async (req, res) => {
   try {
-    console.log('=== GET SELLER ANALYTICS ===');
-    console.log('Seller ID:', req.user._id);
+    console.log('=== GET SUPPLIER ANALYTICS ===');
+    console.log('Supplier ID:', req.user._id);
 
-    const sellerId = req.user._id;
+    const supplierId = req.user._id;
 
     // Aggregate analytics data
     const analytics = await Product.aggregate([
-      { $match: { seller: sellerId } },
+      { $match: { supplier: supplierId } },  // Changed from seller to supplier
       {
         $group: {
           _id: null,
@@ -417,7 +417,7 @@ exports.getSellerAnalytics = async (req, res) => {
 
     // Get category breakdown
     const categoryStats = await Product.aggregate([
-      { $match: { seller: sellerId } },
+      { $match: { supplier: supplierId } },  // Changed from seller to supplier
       {
         $group: {
           _id: '$category',
@@ -430,7 +430,7 @@ exports.getSellerAnalytics = async (req, res) => {
     ]);
 
     // Get top performing products
-    const topProducts = await Product.find({ seller: sellerId })
+    const topProducts = await Product.find({ supplier: supplierId })  // Changed from seller to supplier
       .sort({ views: -1 })
       .limit(5)
       .select('name views inquiries rating.average price');
@@ -445,7 +445,7 @@ exports.getSellerAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get seller analytics error:', error);
+    console.error('Get supplier analytics error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching analytics'
@@ -482,7 +482,7 @@ exports.bulkUpdateStatus = async (req, res) => {
     const result = await Product.updateMany(
       { 
         _id: { $in: productIds }, 
-        seller: req.user._id 
+        supplier: req.user._id   // Changed from seller to supplier
       },
       { status },
       { runValidators: true }

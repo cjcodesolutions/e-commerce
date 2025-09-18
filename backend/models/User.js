@@ -1,4 +1,4 @@
-// backend/models/User.js
+// backend/models/User.js - Fixed Version with Null-Safe Transform
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -366,27 +366,54 @@ userSchema.virtual('profileCompletion').get(function() {
   return Math.round((completed / total) * 100);
 });
 
-// Ensure virtual fields are serialized
+// FIXED: Null-safe toJSON transform function
 userSchema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
-    // Remove sensitive fields from JSON output
-    delete ret.password;
-    delete ret.__v;
-    delete ret.resetPassword;
-    delete ret.verification.emailVerificationToken;
-    delete ret.verification.phoneVerificationCode;
-    delete ret.loginAttempts;
-    delete ret.lockUntil;
-    delete ret.ipAddress;
-    delete ret.deviceInfo;
-    
-    // Only include supplier info for suppliers
-    if (ret.userType !== 'supplier') {
-      delete ret.supplierInfo;
+    // Check if ret exists and is an object
+    if (!ret || typeof ret !== 'object') {
+      console.warn('Transform called with invalid ret:', ret);
+      return ret;
     }
-    
-    return ret;
+
+    try {
+      // Remove sensitive fields from JSON output
+      delete ret.password;
+      delete ret.__v;
+      delete ret.resetPassword;
+      
+      // Safely handle verification object
+      if (ret.verification && typeof ret.verification === 'object') {
+        delete ret.verification.emailVerificationToken;
+        delete ret.verification.phoneVerificationCode;
+      }
+      
+      // Remove other sensitive fields
+      delete ret.loginAttempts;
+      delete ret.lockUntil;
+      delete ret.ipAddress;
+      delete ret.deviceInfo;
+      
+      // Only include supplier info for suppliers
+      if (ret.userType !== 'supplier') {
+        delete ret.supplierInfo;
+      }
+      
+      return ret;
+    } catch (error) {
+      console.error('Error in User model transform:', error);
+      // Return a basic safe version if transform fails
+      return {
+        _id: ret._id,
+        firstName: ret.firstName || '',
+        lastName: ret.lastName || '',
+        email: ret.email || '',
+        userType: ret.userType || 'buyer',
+        status: ret.status || 'active',
+        createdAt: ret.createdAt,
+        updatedAt: ret.updatedAt
+      };
+    }
   }
 });
 
