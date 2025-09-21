@@ -1,4 +1,4 @@
-// backend/controllers/orderController.js - Fully Corrected Version
+// backend/controllers/orderController.js - Fixed Transaction Handling
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
@@ -10,6 +10,7 @@ const mongoose = require('mongoose');
 // @access  Private (Buyers only)
 exports.createOrder = async (req, res) => {
   const session = await mongoose.startSession();
+  let transactionCommitted = false;
   
   try {
     session.startTransaction();
@@ -117,12 +118,17 @@ exports.createOrder = async (req, res) => {
       { session }
     );
 
-    // If everything is successful, commit the transaction.
+    // Commit the transaction
     await session.commitTransaction();
+    transactionCommitted = true;
 
-    // Populate the order outside the transaction for the response.
+    // Populate the order outside the transaction for the response
     const populatedOrder = await Order.findById(newOrder._id)
-      .populate('items.product', 'name images category')
+      .populate({
+        path: 'items.product',
+        select: 'name images category price status',
+        options: { virtuals: false }
+      })
       .populate('items.supplier', 'firstName lastName profile.company')
       .populate('buyer', 'firstName lastName email');
 
@@ -135,8 +141,15 @@ exports.createOrder = async (req, res) => {
     });
 
   } catch (error) {
-    // If any error occurs, abort the transaction.
-    await session.abortTransaction();
+    // Only abort if transaction wasn't committed
+    if (!transactionCommitted) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error aborting transaction:', abortError.message);
+      }
+    }
+    
     console.error('Create order error:', error);
     
     res.status(400).json({
@@ -144,7 +157,7 @@ exports.createOrder = async (req, res) => {
       message: error.message || 'Server error while creating order'
     });
   } finally {
-    // Always end the session to clean up resources.
+    // Always end the session to clean up resources
     session.endSession();
   }
 };
@@ -174,7 +187,11 @@ exports.getUserOrders = async (req, res) => {
 
       [orders, total] = await Promise.all([
         Order.find(query)
-          .populate('items.product', 'name images category')
+          .populate({
+            path: 'items.product',
+            select: 'name images category price status',
+            options: { virtuals: false }
+          })
           .populate('items.supplier', 'firstName lastName profile.company')
           .sort(sort)
           .limit(limit)
@@ -191,7 +208,11 @@ exports.getUserOrders = async (req, res) => {
       [orders, total] = await Promise.all([
         Order.find(query)
           .populate('buyer', 'firstName lastName email')
-          .populate('items.product', 'name images category')
+          .populate({
+            path: 'items.product',
+            select: 'name images category price status',
+            options: { virtuals: false }
+          })
           .sort(sort)
           .limit(limit)
           .skip((page - 1) * limit)
@@ -243,7 +264,11 @@ exports.getOrder = async (req, res) => {
 
     const order = await Order.findById(req.params.id)
       .populate('buyer', 'firstName lastName email')
-      .populate('items.product', 'name images category price')
+      .populate({
+        path: 'items.product',
+        select: 'name images category price status',
+        options: { virtuals: false }
+      })
       .populate('items.supplier', 'firstName lastName email profile.company')
       .lean();
 
@@ -338,7 +363,11 @@ exports.updateOrderStatus = async (req, res) => {
 
     const updatedOrder = await Order.findById(order._id)
       .populate('buyer', 'firstName lastName email')
-      .populate('items.product', 'name images category')
+      .populate({
+        path: 'items.product',
+        select: 'name images category price status',
+        options: { virtuals: false }
+      })
       .populate('items.supplier', 'firstName lastName profile.company')
       .lean();
 
@@ -364,6 +393,7 @@ exports.updateOrderStatus = async (req, res) => {
 // @access  Private (Buyers only)
 exports.cancelOrder = async (req, res) => {
   const session = await mongoose.startSession();
+  let transactionCommitted = false;
   
   try {
     session.startTransaction();
@@ -396,9 +426,14 @@ exports.cancelOrder = async (req, res) => {
     await order.cancelOrder('Cancelled by buyer', req.user._id);
 
     await session.commitTransaction();
+    transactionCommitted = true;
 
     const updatedOrder = await Order.findById(order._id)
-      .populate('items.product', 'name images category')
+      .populate({
+        path: 'items.product',
+        select: 'name images category price status',
+        options: { virtuals: false }
+      })
       .populate('items.supplier', 'firstName lastName profile.company')
       .lean();
 
@@ -411,7 +446,15 @@ exports.cancelOrder = async (req, res) => {
     });
 
   } catch (error) {
-    await session.abortTransaction();
+    // Only abort if transaction wasn't committed
+    if (!transactionCommitted) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error aborting transaction:', abortError.message);
+      }
+    }
+    
     console.error('Cancel order error:', error);
     res.status(error.statusCode || 400).json({
       success: false,
@@ -546,7 +589,8 @@ exports.getSupplierOrders = async (req, res) => {
         .populate('buyer', 'firstName lastName email profile.company profile.phone')
         .populate({
           path: 'items.product',
-          select: 'name images category price brand'
+          select: 'name images category price brand status',
+          options: { virtuals: false }
         })
         .sort(sort)
         .limit(limit)
@@ -593,7 +637,6 @@ exports.getSupplierOrders = async (req, res) => {
   }
 };
 
-
 // @desc    Get supplier order statistics
 // @route   GET /api/orders/supplier/stats
 // @access  Private (Suppliers only)
@@ -639,7 +682,11 @@ exports.getSupplierOrderStats = async (req, res) => {
       
       Order.find({ 'items.supplier': supplierId })
         .populate('buyer', 'firstName lastName')
-        .populate('items.product', 'name')
+        .populate({
+          path: 'items.product',
+          select: 'name price status',
+          options: { virtuals: false }
+        })
         .sort('-createdAt')
         .limit(5)
         .lean()
@@ -691,7 +738,6 @@ exports.getSupplierOrderStats = async (req, res) => {
     });
   }
 };
-
 
 // @desc    Update order status by supplier
 // @route   PUT /api/orders/supplier/:id/status
@@ -757,7 +803,11 @@ exports.updateSupplierOrderStatus = async (req, res) => {
 
     const updatedOrder = await Order.findById(order._id)
       .populate('buyer', 'firstName lastName email')
-      .populate('items.product', 'name images')
+      .populate({
+        path: 'items.product',
+        select: 'name images price status',
+        options: { virtuals: false }
+      })
       .populate('items.supplier', 'firstName lastName profile.company')
       .lean();
 

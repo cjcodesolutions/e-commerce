@@ -130,7 +130,7 @@ const HomePage = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 h-full flex flex-col justify-center">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              The leading B2B ecommerce platform for global trade
+              The leading ecommerce platform for global trade
             </h1>
             
             {/* Search Bar */}

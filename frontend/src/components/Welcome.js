@@ -483,9 +483,9 @@ const Welcome = () => {
         <div className="bg-gray-100 border-b">
           <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center text-sm">
             <div className="flex items-center space-x-4">
-              <span className="flex items-center">
+              {/* <span className="flex items-center">
                 Deliver to: <img src="https://flagcdn.com/w20/lk.png" alt="LK" className="ml-1 w-5 h-3" /> LK
-              </span>
+              </span> */}
             </div>
             <div className="flex items-center space-x-4">
               <button 
@@ -539,13 +539,6 @@ const Welcome = () => {
                 />
                 <div className="flex">
                   <button 
-                    onClick={handleImageSearch}
-                    className="px-4 py-3 bg-white text-gray-600 border-l border-gray-300 hover:bg-gray-50"
-                    title="Image Search"
-                  >
-                    <Camera className="w-5 h-5" />
-                  </button>
-                  <button 
                     onClick={handleSearch}
                     className="px-8 py-3 bg-black text-white rounded-r-lg hover:bg-gray-800 font-medium"
                   >
@@ -556,7 +549,7 @@ const Welcome = () => {
 
               {/* Search Options */}
               <div className="flex items-center space-x-4 mb-4">
-                <button
+                {/* <button
                   onClick={() => setSearchType('products')}
                   className={`flex items-center space-x-2 px-3 py-1 rounded ${
                     searchType === 'products' ? 'bg-white text-orange-500' : 'text-white border border-white'
@@ -565,14 +558,14 @@ const Welcome = () => {
                   <span className="text-lg">🔥</span>
                   <span>Deep Search</span>
                   <span className="text-xs bg-green-500 text-white px-1 rounded">Free</span>
-                </button>
-                <button 
+                </button> */}
+                {/* <button 
                   onClick={handleImageSearch}
                   className="flex items-center space-x-2 text-white hover:text-orange-100"
                 >
                   <Camera className="w-4 h-4" />
                   <span>Image Search</span>
-                </button>
+                </button> */}
               </div>
 
               {/* Frequently Searched */}
