@@ -354,7 +354,7 @@ const Signup = () => {
         </div>
 
         {/* Additional Options */}
-        <div className="text-center">
+        {/* <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -379,10 +379,10 @@ const Signup = () => {
             >
               <span>LinkedIn</span>
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
-    </div>
+    
   );
 };
 

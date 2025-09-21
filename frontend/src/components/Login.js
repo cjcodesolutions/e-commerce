@@ -336,7 +336,7 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Additional Options */}
+        {/* Additional Options
         <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -363,10 +363,10 @@ const Login = () => {
               <span>LinkedIn</span>
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Demo Credentials */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-blue-800 mb-3">Demo Credentials</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
@@ -396,9 +396,9 @@ const Login = () => {
                 Use
               </button>
             </div>
-            
+             */}
             <div className="flex justify-between items-center">
-              <div>
+              {/* <div>
                 <p className="text-xs font-medium text-blue-800">Your Account:</p>
                 <p className="text-xs text-blue-700">cjcodesolutions@gmail.com | tharu**@</p>
               </div>
@@ -408,12 +408,11 @@ const Login = () => {
                 disabled={isLoading}
               >
                 Use
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
-      </div>
-    </div>
+     
   );
 };
 

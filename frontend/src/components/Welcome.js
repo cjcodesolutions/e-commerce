@@ -114,6 +114,8 @@ const Welcome = () => {
     return sorted;
   }, [products, productFilter, productSort]);
 
+  
+
   // Add to cart function
   const addToCart = async (product, quantity = 1) => {
     try {
@@ -1088,13 +1090,13 @@ const Welcome = () => {
                     </p>
                     <div className="flex justify-center space-x-4">
                       <button 
-                        onClick={() => navigate('/signup')}
+                        onClick={() => navigate('/welcome')}
                         className="bg-white text-orange-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
                       >
                         Start Buying
                       </button>
                       <button 
-                        onClick={() => navigate('/sell-on-tradehub')}
+                        onClick={() => navigate('/signup')}
                         className="bg-orange-700 text-white px-8 py-3 rounded-lg hover:bg-orange-800 transition-colors font-semibold"
                       >
                         Start Selling
