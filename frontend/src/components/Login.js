@@ -317,16 +317,7 @@ const Login = () => {
             </div>
 
             {/* Test Backend Button */}
-            <div>
-              <button
-                type="button"
-                onClick={testBackendConnection}
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-              >
-                Test Backend Connection
-              </button>
-            </div>
+            
 
             {/* Sign Up Link */}
             <div className="text-center">

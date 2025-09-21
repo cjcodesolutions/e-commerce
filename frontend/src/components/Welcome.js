@@ -281,8 +281,8 @@ const Welcome = () => {
   }, [frequentlySearchedSets.length]);
 
   const topSearches = [
-    'iphones 15 pro max', 'labubu', 'watch', "women's intimates", 
-    'electric bike', 'smart watch', 'mobile phones', 'laptop'
+    'iphones 15 pro max', 'watch', "women's intimates", 
+    'electric bike', 'smart watch', 'mobile phones', 'laptop','shoes','bags','jewellaries'
   ];
 
   const handleSearch = () => {
@@ -318,9 +318,7 @@ const Welcome = () => {
   };
 
   const quickActions = [
-    { icon: '💼', name: 'Post Buying Request', route: '/post-request' },
     { icon: '🔍', name: 'Find Suppliers', route: '/suppliers' },
-    { icon: '📊', name: 'Market Analysis', route: '/market-analysis' },
     { icon: '🚚', name: 'Logistics Solutions', route: '/logistics' }
   ];
 
@@ -536,7 +534,7 @@ const Welcome = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="labubu 🚀 in LK"
+                  placeholder="Search Items"
                   className="flex-1 px-4 py-3 text-gray-900 rounded-l-lg border-0 focus:outline-none text-lg"
                 />
                 <div className="flex">
@@ -600,37 +598,7 @@ const Welcome = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <h2 className="text-xl">Welcome to TradeHub.com, {user?.firstName || 'User'}</h2>
           
-          {/* Service Icons */}
-          <div className="flex items-center space-x-8 mt-4">
-            <button 
-              onClick={() => navigate('/ai-assistant')}
-              className="flex items-center space-x-2 hover:text-orange-500 transition-colors"
-            >
-              <span className="text-2xl">🔬</span>
-              <span className="text-sm">Accio AI</span>
-            </button>
-            <button 
-              onClick={() => navigate('/rfq')}
-              className="flex items-center space-x-2 hover:text-orange-500 transition-colors"
-            >
-              <span className="text-2xl">💬</span>
-              <span className="text-sm">Request for Quotation</span>
-            </button>
-            <button 
-              onClick={() => navigate('/customization')}
-              className="flex items-center space-x-2 hover:text-orange-500 transition-colors"
-            >
-              <span className="text-2xl">⚡</span>
-              <span className="text-sm">Fast customization</span>
-            </button>
-            <button 
-              onClick={() => navigate('/logistics')}
-              className="flex items-center space-x-2 hover:text-orange-500 transition-colors"
-            >
-              <span className="text-2xl">🚚</span>
-              <span className="text-sm">TradeHub.com Logistics</span>
-            </button>
-          </div>
+         
         </div>
       </div>
 
@@ -704,23 +672,8 @@ const Welcome = () => {
               ))}
             </div>
 
-            {/* Promotional Banner */}
-            <div className="bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg p-8 text-white mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Dispatch in 7 days</h2>
-                  <p className="text-purple-100 mb-4">Fast delivery for your urgent orders</p>
-                  <button 
-                    onClick={() => navigate('/fast-delivery')}
-                    className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    View more
-                  </button>
-                </div>
-                <div className="text-6xl">
-                  📦
-                </div>
-              </div>
+           
+              
               
               {/* Progress indicators */}
               <div className="flex space-x-2 mt-6">
@@ -734,53 +687,14 @@ const Welcome = () => {
                 ))}
               </div>
             </div>
-          </div>
+          
 
           {/* Right Sidebar */}
           <div className="w-80">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                {quickActions.map((action, index) => (
-                  <button 
-                    key={index}
-                    onClick={() => navigate(action.route)}
-                    className="w-full text-left p-3 hover:bg-gray-50 rounded flex items-center space-x-3 transition-colors"
-                  >
-                    <span className="text-lg">{action.icon}</span>
-                    <span className="text-sm">{action.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+           
 
             {/* Additional Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-4 mt-6">
-              <h3 className="font-semibold mb-4">For Business</h3>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => navigate('/sell-on-tradehub')}
-                  className="w-full text-left p-3 hover:bg-gray-50 rounded flex items-center space-x-3 transition-colors"
-                >
-                  <span className="text-lg">🏪</span>
-                  <span className="text-sm">Sell on TradeHub</span>
-                </button>
-                <button 
-                  onClick={() => navigate('/business-account')}
-                  className="w-full text-left p-3 hover:bg-gray-50 rounded flex items-center space-x-3 transition-colors"
-                >
-                  <span className="text-lg">💼</span>
-                  <span className="text-sm">Business Account</span>
-                </button>
-                <button 
-                  onClick={() => navigate('/trade-assurance')}
-                  className="w-full text-left p-3 hover:bg-gray-50 rounded flex items-center space-x-3 transition-colors"
-                >
-                  <span className="text-lg">🛡️</span>
-                  <span className="text-sm">Trade Assurance</span>
-                </button>
-              </div>
-            </div>
+          
 
             {/* Featured Categories from Products */}
             {availableCategories.length > 0 && (
@@ -854,7 +768,7 @@ const Welcome = () => {
                   ))}
                 </div>
                 <button 
-                  onClick={() => navigate('/products?sort=newest')}
+                  onClick={() => navigate('/products')}
                   className="w-full text-center text-sm text-orange-600 hover:text-orange-700 mt-3 py-2 border-t border-gray-100"
                 >
                   View All Recent
@@ -999,7 +913,7 @@ const Welcome = () => {
                   {productsLoading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
                   ) : (
-                    '🔄 Refresh'
+                    ' Refresh'
                   )}
                 </button>
 

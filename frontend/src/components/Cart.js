@@ -306,22 +306,8 @@ const Cart = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Debug Info - Remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-4 bg-gray-100 rounded-lg text-sm">
-            <p><strong>Debug Info:</strong></p>
-            <p>User: {user ? `${user.firstName} (${user.userType})` : 'Guest'}</p>
-            <p>Cart Items: {cart.items?.length || 0}</p>
-            <p>Total Items: {cart.totalItems}</p>
-            <p>Total Amount: ${cart.totalAmount?.toFixed(2)}</p>
-            <button 
-              onClick={refreshCart}
-              className="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-xs"
-            >
-              Refresh Cart
-            </button>
-          </div>
-        )}
+  
+       
 
         {!cart.items || cart.items.length === 0 ? (
           /* Empty Cart */

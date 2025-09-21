@@ -9,7 +9,12 @@ import ShoppingCartPage from './components/ShoppingCartPage';
 import ProductsPage from './components/ProductsPage';
 import SellerDashboard from './components/SellerDashboard';
 import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import Order from './components/Order';
+import OrderSuccess from './components/OrderSuccess';
+
 import './index.css';
+
 
 function App() {
   return (
@@ -25,6 +30,10 @@ function App() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/seller-dashboard" element={<SellerDashboard />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order" element={<Order />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+
 
 
         </Routes>
