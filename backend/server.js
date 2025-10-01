@@ -1,4 +1,4 @@
-// server.js - Corrected Version
+// server.js - Complete Version with Analytics
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -45,55 +45,14 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
-
-// Load order routes with proper error handling
+app.use('/api/search', require('./routes/searchRoutes'));
+// Analytics routes
 try {
-  const orderRoutes = require('./routes/orderRoutes');
-  app.use('/api/orders', orderRoutes);
-  console.log('✅ Order routes loaded successfully');
+  const analyticsRoutes = require('./routes/analyticsRoutes');
+  app.use('/api/analytics', analyticsRoutes);
+  console.log('✅ Analytics routes loaded successfully');
 } catch (error) {
-  console.log('⚠️ Order routes not found, creating fallback routes...');
-  console.error('Order routes error:', error.message);
-  
-  // Create fallback order routes for demo purposes
-  const router = express.Router();
-  
-  // Fallback checkout route
-  router.post('/checkout', (req, res) => {
-    // Simulate order creation
-    const mockOrder = {
-      orderNumber: `TH${Date.now()}${Math.floor(Math.random() * 1000)}`,
-      totalAmount: req.body.totalAmount || 0,
-      createdAt: new Date().toISOString(),
-      orderStatus: 'pending',
-      buyer: req.user?.id || 'demo-user',
-      shippingAddress: req.body.shippingAddress,
-      billingAddress: req.body.billingAddress,
-      paymentMethod: req.body.paymentMethod,
-      paymentDetails: req.body.paymentDetails
-    };
-    
-    console.log('📦 Demo order created:', mockOrder.orderNumber);
-    
-    res.status(201).json({
-      success: true,
-      message: 'Order created successfully (demo mode)',
-      order: mockOrder,
-      orderNumber: mockOrder.orderNumber
-    });
-  });
-  
-  // Fallback get orders route
-  router.get('/', (req, res) => {
-    res.status(200).json({
-      success: true,
-      orders: [],
-      message: 'Demo mode - no orders available'
-    });
-  });
-  
-  app.use('/api/orders', router);
-  console.log('✅ Fallback order routes created');
+  console.log('⚠️ Analytics routes not found:', error.message);
 }
 
 // Health check endpoint
@@ -108,7 +67,8 @@ app.get('/health', (req, res) => {
       products: '/api/products', 
       upload: '/api/upload',
       cart: '/api/cart',
-      orders: '/api/orders'
+      orders: '/api/orders',
+      analytics: '/api/analytics'
     }
   });
 });
@@ -195,12 +155,8 @@ app.use((req, res) => {
       'POST /api/products',
       'GET /api/cart',
       'POST /api/cart/add',
-      'POST /api/orders/checkout'
-    ],
-    availableSuppliers: [
-      'GET /api/orders/supplier/my-orders',
-      'GET /api/orders/supplier/stats',
-      'PUT /api/orders/supplier/:id/status'
+      'POST /api/orders/checkout',
+      'GET /api/analytics/seller'
     ]
   });
 });
@@ -219,6 +175,7 @@ const server = app.listen(PORT, () => {
   console.log('   - Cart: /api/cart');
   console.log('   - Orders: /api/orders');
   console.log('   - Upload: /api/upload');
+  console.log('   - Analytics: /api/analytics');
   console.log('   - Health: /health');
 });
 

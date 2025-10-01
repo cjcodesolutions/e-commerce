@@ -12,6 +12,7 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Order from './components/Order';
 import OrderSuccess from './components/OrderSuccess';
+import SearchPage from './components/SearchPage';
 
 import './index.css';
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order" element={<Order />} />
           <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/search" element={<SearchPage />} />
 
 
 
